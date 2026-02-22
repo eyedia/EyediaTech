@@ -86,6 +86,15 @@ nav {
   border-bottom-color: #2563eb;
 }
 
+.nav-link-external {
+  text-decoration: none;
+  color: #2563eb;
+}
+
+.nav-link-external:hover {
+  color: #1d4ed8;
+}
+
 .card {
   border: 1px solid #e7edf4;
   border-radius: 16px;

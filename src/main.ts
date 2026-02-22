@@ -36,7 +36,7 @@ const pageContent: Record<PageKey, string> = {
         <p class="eyebrow">EyediaTech</p>
         <h1>I design and build software systems that scale quietly and last.</h1>
         <p>
-          Most of my work lives in data platforms — cloud-native architectures, modern lakehouses,
+          Most of my work lives in data platforms, cloud-native architectures, modern lakehouses,
           and Spark-based pipelines that move information from raw signals to usable insight.
         </p>
         <p>
@@ -160,6 +160,7 @@ app.innerHTML = `
         <button class="nav-link active" data-page="home">Home</button>
         <button class="nav-link" data-page="products">Products</button>
         <button class="nav-link" data-page="blog">Blog</button>
+        <a class="nav-link nav-link-external" href="https://eyedeeaphotos.eyediatech.com" target="_blank" rel="noopener noreferrer">Eyedeea Photos ↗</a>
       </nav>
     </header>
     <main id="page-root"></main>
@@ -171,7 +172,7 @@ app.innerHTML = `
 `;
 
 const pageRoot = document.querySelector<HTMLElement>('#page-root');
-const navButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.nav-link'));
+const navButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('button.nav-link'));
 
 function render(page: PageKey) {
   if (!pageRoot) return;
