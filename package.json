@@ -6,9 +6,18 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "nodemon:dev": "nodemon --watch src --watch public --watch index.html --ext ts,js,css,html --exec \"npm run dev -- --host 0.0.0.0 --port 5173\"",
+    "nodemon:build": "npm run build",
+    "nodemon:deploy": "npm run nodemon:build && nodemon --watch dist --ext html,css,js --exec \"npm run preview -- --host 0.0.0.0 --port 8080 --strictPort\"",
+    "nodemon:restart": "npm run nodemon:build",
+    "docker:build": "docker build -t eyediatech:latest .",
+    "docker:deploy": "docker run -d --name eyediatech-web -p 8080:80 --restart unless-stopped eyediatech:latest",
+    "docker:restart": "docker restart eyediatech-web",
+    "docker:remove": "docker rm -f eyediatech-web"
   },
   "devDependencies": {
+    "nodemon": "^3.1.10",
     "typescript": "~5.9.3",
     "vite": "^7.3.1"
   }
