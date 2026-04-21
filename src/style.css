@@ -49,14 +49,15 @@ body {
   font-weight: 700;
   letter-spacing: 0.2px;
   color: #0f172a;
+  text-decoration: none;
 }
 
 .brand-logo {
-  width: 32px;
-  height: 32px;
-  object-fit: cover;
-  border-radius: 8px;
-  box-shadow: 0 6px 16px rgba(31, 41, 55, 0.16);
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 nav {
@@ -151,10 +152,49 @@ p {
   justify-content: center;
 }
 
-.hero-graphic {
+.hero-graphic-wrap {
+  position: relative;
+  display: inline-block;
   width: 100%;
   max-width: 380px;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.hero-graphic-wrap::after {
+  content: '';
+  position: absolute;
+  inset: -28% -42%;
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0) 28%,
+    rgba(255, 255, 255, 0.12) 45%,
+    rgba(255, 255, 255, 0.42) 50%,
+    rgba(255, 255, 255, 0.12) 55%,
+    rgba(255, 255, 255, 0) 72%
+  );
+  transform: translateX(-58%) rotate(-9deg);
+  animation: hero-shine 4.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.hero-graphic {
+  width: 100%;
+  max-width: 100%;
   height: auto;
+  display: block;
+}
+
+@keyframes hero-shine {
+  0% {
+    transform: translateX(-58%) rotate(-9deg);
+  }
+  55% {
+    transform: translateX(62%) rotate(-9deg);
+  }
+  100% {
+    transform: translateX(62%) rotate(-9deg);
+  }
 }
 
 .hero-logo-wrap {
@@ -215,8 +255,8 @@ p {
 }
 
 .product-logo {
-  width: 56px;
-  height: 56px;
+  width: 66px;
+  height: 66px;
   object-fit: contain;
   border-radius: 10px;
 }
