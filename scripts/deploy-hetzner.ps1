@@ -8,7 +8,7 @@ param(
   [string]$DomainAlias = "",
   [int]$UpstreamPort = 8090,
   [string]$ComposeFile = "docker-compose.yml",
-  [string]$SshKeyPath = "C:\Users\debjy\.ssh\do-eyedeea",
+  [string]$SshKeyPath = $env:EYEDIATECH_SSH_KEY_PATH,
   [string]$VmUser = "root",
   [string]$RepoUrl = "https://github.com/eyedia/EyediaTech.git",
   [string]$Branch = "main",
@@ -72,6 +72,10 @@ function Assert-DnsTargetsVm([string]$hostName, [string[]]$expectedIpv4) {
   }
 }
 
+if ([string]::IsNullOrWhiteSpace($SshKeyPath)) {
+  throw "SshKeyPath is required. Pass -SshKeyPath or set EYEDIATECH_SSH_KEY_PATH."
+}
+
 Assert-PathExists $SshKeyPath "SSH key"
 
 if ($WithSsl -and [string]::IsNullOrWhiteSpace($CertbotEmail)) {
@@ -97,8 +101,16 @@ if ($WithSsl) {
 
   Write-Host ('[deploy-root-web] Verifying DNS for SSL domains against VM IPv4: {0}' -f ($vmARecords -join ', '))
   Assert-DnsTargetsVm $Domain $vmARecords
-  if (-not [string]::IsNullOrWhiteSpace($DomainAlias)) {
-    Assert-DnsTargetsVm $DomainAlias $vmARecords
+}
+
+$effectiveDomainAlias = $DomainAlias
+if ($WithSsl -and -not [string]::IsNullOrWhiteSpace($effectiveDomainAlias)) {
+  try {
+    Assert-DnsTargetsVm $effectiveDomainAlias $vmARecords
+  }
+  catch {
+    Write-Warning ('DomainAlias "{0}" does not currently target this VM. Continuing SSL request with primary domain only.' -f $effectiveDomainAlias)
+    $effectiveDomainAlias = ""
   }
 }
 
@@ -119,8 +131,8 @@ if ($WithSsl) {
 }
 
 $domainAliasArg = ""
-if (-not [string]::IsNullOrWhiteSpace($DomainAlias)) {
-  $domainAliasArg = " --domain-alias '$DomainAlias'"
+if (-not [string]::IsNullOrWhiteSpace($effectiveDomainAlias)) {
+  $domainAliasArg = " --domain-alias '$effectiveDomainAlias'"
 }
 
 Write-Host '[deploy-root-web] Running remote deployment'

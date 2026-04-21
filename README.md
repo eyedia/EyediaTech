@@ -44,11 +44,12 @@ Run from Windows:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\deploy-hetzner.ps1 \
-	-VmHost 178.156.212.148 \
-	-Domain "www.eyediatech.com" \
-	-DomainAlias "eyediatech.com" \
+	-VmHost "<your-vm-ip-or-hostname>" \
+	-Domain "<primary-domain>" \
+	-DomainAlias "<optional-domain-alias>" \
+	-SshKeyPath "<path-to-your-private-key>" \
 	-WithSsl \
-	-CertbotEmail "support@eyediatech.com"
+	-CertbotEmail "<your-email>"
 ```
 
 Default app upstream port is `8090` (matching [docker-compose.yml](docker-compose.yml)).
