@@ -35,3 +35,20 @@ Output is generated in `dist/`.
 ## Deployment
 
 See [docs/GCP_STATIC_DEPLOY.md](docs/GCP_STATIC_DEPLOY.md).
+
+## VM Deploy (SSH/SCP Pattern)
+
+Scripts are available in [scripts/deploy-hetzner.ps1](scripts/deploy-hetzner.ps1) and [scripts/vm-deploy-hetzner.sh](scripts/vm-deploy-hetzner.sh).
+
+Run from Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\deploy-hetzner.ps1 \
+	-VmHost 178.156.212.148 \
+	-Domain "www.eyediatech.com" \
+	-DomainAlias "eyediatech.com" \
+	-WithSsl \
+	-CertbotEmail "support@eyediatech.com"
+```
+
+Default app upstream port is `8090` (matching [docker-compose.yml](docker-compose.yml)).
