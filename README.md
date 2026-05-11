@@ -4,7 +4,7 @@ Personal brand site for `www.eyediatech.com` built as a static multi-page websit
 - Home at `/`
 - Products at `/products/`
 - Blog home at `/blog/`
-- Placeholder posts at `/blog/blog1.htm` and `/blog/blog2.htm`
+- First published post at `/blog/beyond-the-megapixels.html`
 
 This repository is intentionally separate from Eyedeea Photos.
 
