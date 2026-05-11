@@ -4,11 +4,62 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="EyediaTech — data platforms, cloud architecture, and practical AI products." />
-    <title>EyediaTech | Data Platforms & Practical AI</title>
+    <meta
+      name="description"
+      content="EyediaTech builds practical products around data, AI, and preserving photo memories for modern households."
+    />
+    <link rel="stylesheet" href="/styles/site.css" />
+    <title>EyediaTech | About Me</title>
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="brand" href="/" aria-label="Go to the home page">
+          <img src="/logo.png" alt="EyediaTech logo" class="brand-logo" />
+          <span>EyediaTech</span>
+        </a>
+        <nav>
+          <a class="nav-link active" href="/">Home</a>
+          <a class="nav-link" href="/products/">Products</a>
+          <a class="nav-link" href="/blog/">Blog</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="page-shell">
+      <main class="page-stack">
+        <section class="home-hero">
+          <h1 class="home-hero-title">From large-scale engineering to preserving photographs that people actually revisit.</h1>
+          <div class="home-grid">
+            <article class="home-about">
+            <p>
+              With over 25 years in the industry, my experience ranges from building a native,
+              operating system agnostic telecom billing server using C++ and ACE,
+              to modern AI-driven programming. Professionally, I have built many large-scale and interesting products.
+            </p>
+            <p>
+              But at times you want to create something for yourself, and I am at that stage now.
+              As a hobby photographer, I have always respected the value of preserving and organizing photos.
+              Among family and friends, I am usually known for digitizing and preserving photographs,
+              from film camera collections to the present day of digital photography.
+            </p>
+            <p>
+              I strongly believe that if you preserve and organize photographs well,
+              you reach for them more often. That is the real purpose of a photograph, isn&apos;t it?
+            </p>
+            </article>
+
+            <aside class="home-visual" aria-label="EyediaTech hero graphic">
+              <img src="/eyedia_tech_g1.png" alt="EyediaTech graphic" class="hero-graphic home-hero-graphic" />
+            </aside>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span>© 2026 EyediaTech</span>
+        <a href="mailto:support@eyediatech.com">support@eyediatech.com</a>
+      </footer>
+    </div>
   </body>
 </html>

@@ -1,9 +1,10 @@
 # EyediaTech Website
 
-Personal brand site for `www.eyediatech.com` with three sections:
-- Home
-- Products
-- Blog (3 starter posts)
+Personal brand site for `www.eyediatech.com` built as a static multi-page website:
+- Home at `/`
+- Products at `/products/`
+- Blog home at `/blog/`
+- Placeholder posts at `/blog/blog1.htm` and `/blog/blog2.htm`
 
 This repository is intentionally separate from Eyedeea Photos.
 
@@ -12,6 +13,7 @@ This repository is intentionally separate from Eyedeea Photos.
 - Vite
 - TypeScript
 - Static frontend (no backend required)
+- Shared assets and additional HTML pages served from `public/`
 
 ## Local development
 

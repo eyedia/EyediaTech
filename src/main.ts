@@ -33,18 +33,17 @@ const pageContent: Record<PageKey, string> = {
   home: `
     <section class="hero card">
       <div class="hero-text">
-        <h1>I design and build software systems that scale quietly and last.</h1>
+        <h1>I design systems you can’t see and chase moments you can.</h1>
         <p>
-          Most of my work lives in data platforms, cloud-native architectures, modern lakehouses,
-          and Spark-based pipelines that move information from raw signals to usable insight.
+          I work with systems, data, and ideas - teaching machines to notice patterns while I continue noticing the world.
         </p>
         <p>
-          I enjoy shaping end-to-end data flows, simplifying complex systems, and exploring practical AI for development,
-          automation, and decision support.
+          By day, I build pipelines, experiments, and small intelligent things. By choice, I chase light, 
+          motion, perspective, and growth - sometimes through a lens, sometimes from the sky, sometimes with my hands in the soil.
         </p>
         <p>
-          At the core, I care about thoughtful engineering: systems that are understandable, resilient,
-          and useful long after the diagrams are gone.
+          I rest in forests, campsites, and moving skies. I carry a camera, a curiosity for systems, 
+          and a small home on wheels when the road calls..
         </p>
       </div>
       <div class="hero-visual">
