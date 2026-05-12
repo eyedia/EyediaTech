@@ -8,7 +8,7 @@ First-time SSL setup (requests certificate):
 .\scripts\deploy-hetzner.ps1 -VmHost "178.156.212.148" -Domain "eyediatech.com" -DomainAlias "www.eyediatech.com" -SshKeyPath "C:\Users\debjy\.ssh\do-eyedeea" -WithSsl -DeployCert -CertbotEmail "support@eyediatech.com"
 ```
 
-Routine deploy (keeps existing SSL/certificate automatically if present):
+Routine deploy (keeps existing SSL/certificate automatically by reusing the active Nginx SSL config):
 
 ```powershell
 .\scripts\deploy-hetzner.ps1 -VmHost "178.156.212.148" -Domain "eyediatech.com" -DomainAlias "www.eyediatech.com" -SshKeyPath "C:\Users\debjy\.ssh\do-eyedeea"

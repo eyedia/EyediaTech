@@ -52,7 +52,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\deploy-hetzner.ps1 \
 	-SshKeyPath "<path-to-your-private-key>"
 ```
 
-This default command preserves existing HTTPS when certificates already exist on the VM.
+This default command preserves existing HTTPS by reusing the currently configured Nginx certificate paths.
 
 For first-time certificate issuance:
 

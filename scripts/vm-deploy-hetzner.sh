@@ -146,9 +146,23 @@ fi
 
 CERT_PATH="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
 KEY_PATH="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
+NGINX_SITE_CONF="/etc/nginx/sites-available/root-web-primary.conf"
+
+if [[ -f "$NGINX_SITE_CONF" ]]; then
+  existing_cert_path=$(awk '$1=="ssl_certificate" {gsub(";", "", $2); print $2; exit}' "$NGINX_SITE_CONF" || true)
+  existing_key_path=$(awk '$1=="ssl_certificate_key" {gsub(";", "", $2); print $2; exit}' "$NGINX_SITE_CONF" || true)
+
+  if [[ -n "${existing_cert_path:-}" && -n "${existing_key_path:-}" && -f "$existing_cert_path" && -f "$existing_key_path" ]]; then
+    CERT_PATH="$existing_cert_path"
+    KEY_PATH="$existing_key_path"
+  fi
+fi
 
 ssl_mode="http"
 if [[ "$FORCE_HTTP" == "true" ]]; then
+  ssl_mode="http"
+elif [[ "$DEPLOY_CERT" == "true" ]]; then
+  # Bootstrap via HTTP first so nginx can start before cert files exist.
   ssl_mode="http"
 elif [[ "$WITH_SSL" == "true" ]]; then
   ssl_mode="https"
@@ -220,6 +234,50 @@ if [[ "$WITH_SSL" == "true" && "$DEPLOY_CERT" == "true" ]]; then
   else
     certbot --nginx --non-interactive --agree-tos --redirect --expand --keep-until-expiring --preferred-challenges http -m "$CERTBOT_EMAIL" -d "$DOMAIN"
   fi
+
+  issued_cert_path=$(awk '$1=="ssl_certificate" {gsub(";", "", $2); print $2; exit}' "$NGINX_SITE_CONF" || true)
+  issued_key_path=$(awk '$1=="ssl_certificate_key" {gsub(";", "", $2); print $2; exit}' "$NGINX_SITE_CONF" || true)
+  if [[ -n "${issued_cert_path:-}" && -n "${issued_key_path:-}" && -f "$issued_cert_path" && -f "$issued_key_path" ]]; then
+    CERT_PATH="$issued_cert_path"
+    KEY_PATH="$issued_key_path"
+  fi
+
+  if [[ ! -f "$CERT_PATH" || ! -f "$KEY_PATH" ]]; then
+    echo "Certificate deployment finished, but certificate files were not found for ${DOMAIN}." >&2
+    exit 1
+  fi
+
+  # Normalize back to our managed config while preserving the certbot-issued cert path.
+  cat > /etc/nginx/sites-available/root-web-primary.conf <<EOF
+server {
+  listen 80;
+  listen [::]:80;
+  server_name ${DOMAIN}${ALIAS_PART};
+  return 301 https://\$host\$request_uri;
+}
+
+server {
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
+  server_name ${DOMAIN}${ALIAS_PART};
+
+  ssl_certificate ${CERT_PATH};
+  ssl_certificate_key ${KEY_PATH};
+
+  location / {
+    proxy_pass http://127.0.0.1:${UPSTREAM_PORT};
+    proxy_http_version 1.1;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "upgrade";
+  }
+}
+EOF
+
+  nginx -t
   systemctl restart nginx
 fi
 
