@@ -49,9 +49,33 @@ powershell -ExecutionPolicy Bypass -File .\scripts\deploy-hetzner.ps1 \
 	-VmHost "<your-vm-ip-or-hostname>" \
 	-Domain "<primary-domain>" \
 	-DomainAlias "<optional-domain-alias>" \
+	-SshKeyPath "<path-to-your-private-key>"
+```
+
+This default command preserves existing HTTPS when certificates already exist on the VM.
+
+For first-time certificate issuance:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\deploy-hetzner.ps1 \
+	-VmHost "<your-vm-ip-or-hostname>" \
+	-Domain "<primary-domain>" \
+	-DomainAlias "<optional-domain-alias>" \
 	-SshKeyPath "<path-to-your-private-key>" \
 	-WithSsl \
+	-DeployCert \
 	-CertbotEmail "<your-email>"
+```
+
+To explicitly deploy without SSL:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\deploy-hetzner.ps1 \
+	-VmHost "<your-vm-ip-or-hostname>" \
+	-Domain "<primary-domain>" \
+	-DomainAlias "<optional-domain-alias>" \
+	-SshKeyPath "<path-to-your-private-key>" \
+	-ForceHttp
 ```
 
 Default app upstream port is `8090` (matching [docker-compose.yml](docker-compose.yml)).

@@ -9,6 +9,7 @@ UPSTREAM_PORT="8090"
 DOMAIN=""
 DOMAIN_ALIAS=""
 WITH_SSL="false"
+FORCE_HTTP="false"
 DEPLOY_CERT="false"
 CERTBOT_EMAIL=""
 
@@ -46,6 +47,10 @@ while [[ $# -gt 0 ]]; do
       WITH_SSL="true"
       shift 1
       ;;
+    --force-http)
+      FORCE_HTTP="true"
+      shift 1
+      ;;
     --deploy-cert)
       DEPLOY_CERT="true"
       shift 1
@@ -77,6 +82,11 @@ fi
 
 if [[ "$DEPLOY_CERT" == "true" && -z "$CERTBOT_EMAIL" ]]; then
   echo "--certbot-email is required when --deploy-cert is used" >&2
+  exit 1
+fi
+
+if [[ "$FORCE_HTTP" == "true" && "$WITH_SSL" == "true" ]]; then
+  echo "--force-http and --with-ssl cannot be used together" >&2
   exit 1
 fi
 
@@ -134,8 +144,22 @@ if [[ -n "$DOMAIN_ALIAS" ]]; then
   ALIAS_PART=" $DOMAIN_ALIAS"
 fi
 
+CERT_PATH="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
+KEY_PATH="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
+
+ssl_mode="http"
+if [[ "$FORCE_HTTP" == "true" ]]; then
+  ssl_mode="http"
+elif [[ "$WITH_SSL" == "true" ]]; then
+  ssl_mode="https"
+elif [[ -f "$CERT_PATH" && -f "$KEY_PATH" ]]; then
+  ssl_mode="https"
+  log "Detected existing certificate for ${DOMAIN}; preserving HTTPS configuration"
+fi
+
 log "Configuring host nginx reverse proxy for root-domain app..."
-cat > /etc/nginx/sites-available/root-web-primary.conf <<EOF
+if [[ "$ssl_mode" == "http" ]]; then
+  cat > /etc/nginx/sites-available/root-web-primary.conf <<EOF
 server {
   listen 80;
   listen [::]:80;
@@ -153,32 +177,7 @@ server {
   }
 }
 EOF
-
-ln -sfn /etc/nginx/sites-available/root-web-primary.conf /etc/nginx/sites-enabled/root-web-primary.conf
-nginx -t
-systemctl enable nginx
-systemctl restart nginx
-
-if [[ "$WITH_SSL" == "true" && "$DEPLOY_CERT" == "true" ]]; then
-  log "Requesting HTTPS certificate for ${DOMAIN}${ALIAS_PART}"
-  if [[ -n "$DOMAIN_ALIAS" ]]; then
-    certbot --nginx --non-interactive --agree-tos --redirect --expand --keep-until-expiring --preferred-challenges http -m "$CERTBOT_EMAIL" -d "$DOMAIN" -d "$DOMAIN_ALIAS"
-  else
-    certbot --nginx --non-interactive --agree-tos --redirect --expand --keep-until-expiring --preferred-challenges http -m "$CERTBOT_EMAIL" -d "$DOMAIN"
-  fi
-  systemctl restart nginx
-fi
-
-if [[ "$WITH_SSL" == "true" && "$DEPLOY_CERT" != "true" ]]; then
-  CERT_PATH="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
-  KEY_PATH="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
-
-  if [[ ! -f "$CERT_PATH" || ! -f "$KEY_PATH" ]]; then
-    echo "SSL is enabled, but certificate files were not found for ${DOMAIN}. Run with --deploy-cert first." >&2
-    exit 1
-  fi
-
-  log "Reusing existing HTTPS certificate for ${DOMAIN}"
+else
   cat > /etc/nginx/sites-available/root-web-primary.conf <<EOF
 server {
   listen 80;
@@ -207,9 +206,30 @@ server {
   }
 }
 EOF
+fi
 
-  nginx -t
+ln -sfn /etc/nginx/sites-available/root-web-primary.conf /etc/nginx/sites-enabled/root-web-primary.conf
+nginx -t
+systemctl enable nginx
+systemctl restart nginx
+
+if [[ "$WITH_SSL" == "true" && "$DEPLOY_CERT" == "true" ]]; then
+  log "Requesting HTTPS certificate for ${DOMAIN}${ALIAS_PART}"
+  if [[ -n "$DOMAIN_ALIAS" ]]; then
+    certbot --nginx --non-interactive --agree-tos --redirect --expand --keep-until-expiring --preferred-challenges http -m "$CERTBOT_EMAIL" -d "$DOMAIN" -d "$DOMAIN_ALIAS"
+  else
+    certbot --nginx --non-interactive --agree-tos --redirect --expand --keep-until-expiring --preferred-challenges http -m "$CERTBOT_EMAIL" -d "$DOMAIN"
+  fi
   systemctl restart nginx
+fi
+
+if [[ "$WITH_SSL" == "true" && "$DEPLOY_CERT" != "true" && "$ssl_mode" == "https" ]]; then
+  log "Reusing existing HTTPS certificate for ${DOMAIN}"
+fi
+
+if [[ "$WITH_SSL" == "true" && "$DEPLOY_CERT" != "true" && "$ssl_mode" != "https" ]]; then
+  echo "SSL is enabled, but certificate files were not found for ${DOMAIN}. Run with --deploy-cert first." >&2
+  exit 1
 fi
 
 log "Service status:"
