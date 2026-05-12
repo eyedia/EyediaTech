@@ -14,6 +14,7 @@ param(
   [string]$Branch = "main",
   [string]$BaseDir = "/opt/eyedeea",
   [switch]$WithSsl,
+  [switch]$DeployCert,
   [string]$CertbotEmail
 )
 
@@ -78,11 +79,13 @@ if ([string]::IsNullOrWhiteSpace($SshKeyPath)) {
 
 Assert-PathExists $SshKeyPath "SSH key"
 
-if ($WithSsl -and [string]::IsNullOrWhiteSpace($CertbotEmail)) {
-  throw "CertbotEmail is required when -WithSsl is used"
+$enableSsl = $WithSsl -or $DeployCert
+
+if ($DeployCert -and [string]::IsNullOrWhiteSpace($CertbotEmail)) {
+  throw "CertbotEmail is required when -DeployCert is true"
 }
 
-if ($WithSsl) {
+if ($DeployCert) {
   $vmIp = $null
   $vmARecords = @()
   if ([System.Net.IPAddress]::TryParse($VmHost, [ref]$vmIp)) {
@@ -104,7 +107,7 @@ if ($WithSsl) {
 }
 
 $effectiveDomainAlias = $DomainAlias
-if ($WithSsl -and -not [string]::IsNullOrWhiteSpace($effectiveDomainAlias)) {
+if ($DeployCert -and -not [string]::IsNullOrWhiteSpace($effectiveDomainAlias)) {
   try {
     Assert-DnsTargetsVm $effectiveDomainAlias $vmARecords
   }
@@ -126,8 +129,12 @@ scp -i $resolvedKey $localDeployScript $remoteScriptPath
 Assert-LastExitCode "SCP remote root-web deploy script"
 
 $sslArgs = ""
-if ($WithSsl) {
-  $sslArgs = " --with-ssl --certbot-email '$CertbotEmail'"
+if ($enableSsl) {
+  $sslArgs = " --with-ssl"
+}
+
+if ($DeployCert) {
+  $sslArgs += " --deploy-cert --certbot-email '$CertbotEmail'"
 }
 
 $domainAliasArg = ""

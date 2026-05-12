@@ -9,6 +9,7 @@ UPSTREAM_PORT="8090"
 DOMAIN=""
 DOMAIN_ALIAS=""
 WITH_SSL="false"
+DEPLOY_CERT="false"
 CERTBOT_EMAIL=""
 
 while [[ $# -gt 0 ]]; do
@@ -45,6 +46,10 @@ while [[ $# -gt 0 ]]; do
       WITH_SSL="true"
       shift 1
       ;;
+    --deploy-cert)
+      DEPLOY_CERT="true"
+      shift 1
+      ;;
     --certbot-email)
       CERTBOT_EMAIL="$2"
       shift 2
@@ -70,8 +75,8 @@ if [[ -z "$DOMAIN" ]]; then
   exit 1
 fi
 
-if [[ "$WITH_SSL" == "true" && -z "$CERTBOT_EMAIL" ]]; then
-  echo "--certbot-email is required when --with-ssl is used" >&2
+if [[ "$DEPLOY_CERT" == "true" && -z "$CERTBOT_EMAIL" ]]; then
+  echo "--certbot-email is required when --deploy-cert is used" >&2
   exit 1
 fi
 
@@ -94,7 +99,7 @@ if ! command -v nginx >/dev/null 2>&1; then
   DEBIAN_FRONTEND=noninteractive apt-get install -y nginx
 fi
 
-if [[ "$WITH_SSL" == "true" ]] && ! command -v certbot >/dev/null 2>&1; then
+if [[ "$DEPLOY_CERT" == "true" ]] && ! command -v certbot >/dev/null 2>&1; then
   log "Installing certbot..."
   apt-get update
   DEBIAN_FRONTEND=noninteractive apt-get install -y certbot python3-certbot-nginx
@@ -154,13 +159,56 @@ nginx -t
 systemctl enable nginx
 systemctl restart nginx
 
-if [[ "$WITH_SSL" == "true" ]]; then
+if [[ "$WITH_SSL" == "true" && "$DEPLOY_CERT" == "true" ]]; then
   log "Requesting HTTPS certificate for ${DOMAIN}${ALIAS_PART}"
   if [[ -n "$DOMAIN_ALIAS" ]]; then
-    certbot --nginx --non-interactive --agree-tos --redirect --keep-until-expiring --preferred-challenges http -m "$CERTBOT_EMAIL" -d "$DOMAIN" -d "$DOMAIN_ALIAS"
+    certbot --nginx --non-interactive --agree-tos --redirect --expand --keep-until-expiring --preferred-challenges http -m "$CERTBOT_EMAIL" -d "$DOMAIN" -d "$DOMAIN_ALIAS"
   else
-    certbot --nginx --non-interactive --agree-tos --redirect --keep-until-expiring --preferred-challenges http -m "$CERTBOT_EMAIL" -d "$DOMAIN"
+    certbot --nginx --non-interactive --agree-tos --redirect --expand --keep-until-expiring --preferred-challenges http -m "$CERTBOT_EMAIL" -d "$DOMAIN"
   fi
+  systemctl restart nginx
+fi
+
+if [[ "$WITH_SSL" == "true" && "$DEPLOY_CERT" != "true" ]]; then
+  CERT_PATH="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
+  KEY_PATH="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
+
+  if [[ ! -f "$CERT_PATH" || ! -f "$KEY_PATH" ]]; then
+    echo "SSL is enabled, but certificate files were not found for ${DOMAIN}. Run with --deploy-cert first." >&2
+    exit 1
+  fi
+
+  log "Reusing existing HTTPS certificate for ${DOMAIN}"
+  cat > /etc/nginx/sites-available/root-web-primary.conf <<EOF
+server {
+  listen 80;
+  listen [::]:80;
+  server_name ${DOMAIN}${ALIAS_PART};
+  return 301 https://\$host\$request_uri;
+}
+
+server {
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
+  server_name ${DOMAIN}${ALIAS_PART};
+
+  ssl_certificate ${CERT_PATH};
+  ssl_certificate_key ${KEY_PATH};
+
+  location / {
+    proxy_pass http://127.0.0.1:${UPSTREAM_PORT};
+    proxy_http_version 1.1;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "upgrade";
+  }
+}
+EOF
+
+  nginx -t
   systemctl restart nginx
 fi
 
