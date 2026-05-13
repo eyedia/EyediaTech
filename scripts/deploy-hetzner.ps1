@@ -14,6 +14,7 @@ param(
   [string]$Branch = "main",
   [string]$BaseDir = "/opt/eyedeea",
   [switch]$WithSsl,
+  [switch]$ForceHttp,
   [switch]$DeployCert,
   [string]$CertbotEmail
 )
@@ -81,6 +82,10 @@ Assert-PathExists $SshKeyPath "SSH key"
 
 $enableSsl = $WithSsl -or $DeployCert
 
+if ($ForceHttp -and $enableSsl) {
+  throw "ForceHttp cannot be combined with WithSsl or DeployCert. Use either HTTPS mode or HTTP-only mode."
+}
+
 if ($DeployCert -and [string]::IsNullOrWhiteSpace($CertbotEmail)) {
   throw "CertbotEmail is required when -DeployCert is true"
 }
@@ -131,6 +136,10 @@ Assert-LastExitCode "SCP remote root-web deploy script"
 $sslArgs = ""
 if ($enableSsl) {
   $sslArgs = " --with-ssl"
+}
+
+if ($ForceHttp) {
+  $sslArgs += " --force-http"
 }
 
 if ($DeployCert) {
