@@ -10,6 +10,7 @@ export default defineConfig({
         products: resolve(__dirname, 'products/index.html'),
         blog: resolve(__dirname, 'blog/index.html'),
         articleBeyondMegapixels: resolve(__dirname, 'blog/beyond-the-megapixels.html'),
+        articleNotJustPhotos: resolve(__dirname, 'blog/your-photos-are-not-just-photos-anymore.html'),
       },
     },
   },

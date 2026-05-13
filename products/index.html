@@ -30,37 +30,67 @@
       <main class="page-stack">
         <section class="card section-block">
           <h1>Products</h1>
-          <h2>Focused tools, built for real households and real operations.</h2>
+          <h2>Focused tools, built for real people and real operations.</h2>
           <p>
             EyediaTech stays intentionally narrow: products should solve a clear problem,
             remain easy to operate, and improve through steady iteration rather than feature sprawl.
           </p>
         </section>
 
-        <section class="product-grid">
-          <article class="card product-card">
-            <div class="product-header">
-              <img src="/eyedeea_photos.png" alt="Eyedeea Photos logo" class="product-logo" />
+        <section class="product-grid featured-grid">
+          <article class="card product-card featured-product">
+            <div class="featured-product-layout">
               <div>
-                <p class="kicker">Photo platform</p>
-                <h3>Eyedeea Photos</h3>
+                <div class="product-header">
+                  <img src="/eyedeea_photos.png" alt="Eyedeea Photos logo" class="product-logo" />
+                  <div>
+                    <p class="kicker">Photo platform</p>
+                    <h3>Eyedeea Photos</h3>
+                  </div>
+                </div>
+                <p class="product-tagline">AI-powered photo intelligence and curation for large, messy libraries.</p>
+                <p class="featured-summary">
+                  Eyedeea Photos helps people understand what they have, reduce clutter, preserve folder control,
+                  and rediscover meaningful moments across web, mobile, desktop, and TV-friendly experiences.
+                </p>
+                <ul class="list-clean">
+                  <li>Applies AI-driven photo understanding to auto-curate raw libraries into structured event albums.</li>
+                  <li>Ingests photos from local storage, NAS and Synology sources, and cloud-connected libraries.</li>
+                  <li>Shows collection intelligence through KYP with totals, curated counts, duplicates, blurry images, and storage usage.</li>
+                </ul>
+                <p class="product-note">Preview snapshots from the app experience.</p>
+                <div class="cta-row">
+                  <a class="button" href="http://eyedeeaphotos.com/" target="_blank" rel="noreferrer noopener">Visit Eyedeea Photos</a>
+                </div>
               </div>
-            </div>
-            <p class="product-tagline">Preserve, organize, and revisit the moments that matter.</p>
-            <p>
-              A household-first photo platform designed to make digital memories easier to keep,
-              search, curate, and enjoy across devices.
-            </p>
-            <ul class="list-clean">
-              <li>Organize family photo collections without turning them into a maintenance project.</li>
-              <li>Bring digitized film photos and modern digital libraries into one place.</li>
-              <li>Make revisiting old memories as easy as storing them.</li>
-            </ul>
-            <div class="cta-row">
-              <a class="button" href="http://eyedeeaphotos.com/" target="_blank" rel="noreferrer noopener">Visit Eyedeea Photos</a>
+              <div>
+                <div class="slider-shell" data-slider="eyedeea-photos" aria-label="Eyedeea Photos app screenshots">
+                  <div class="slider-track">
+                    <figure class="slide"><img src="/eyedeea_photos.png" alt="Eyedeea Photos logo" /></figure>
+                    <figure class="slide"><img src="/ep_screenshots/01_ss.jpg" alt="Eyedeea Photos screenshot 1" /></figure>
+                    <figure class="slide"><img src="/ep_screenshots/02_ss.jpg" alt="Eyedeea Photos screenshot 2" /></figure>
+                    <figure class="slide"><img src="/ep_screenshots/03_ss.jpg" alt="Eyedeea Photos screenshot 3" /></figure>
+                    <figure class="slide"><img src="/ep_screenshots/04_ss.jpg" alt="Eyedeea Photos screenshot 4" /></figure>
+                    <figure class="slide"><img src="/ep_screenshots/05_ss.jpg" alt="Eyedeea Photos screenshot 5" /></figure>
+                    <figure class="slide"><img src="/ep_screenshots/06_ss.jpg" alt="Eyedeea Photos screenshot 6" /></figure>
+                  </div>
+                </div>
+                <div class="slider-dots" aria-label="Slide navigation" role="tablist">
+                  <button class="slider-dot active" type="button" aria-label="Show slide 1" data-slide-index="0"></button>
+                  <button class="slider-dot" type="button" aria-label="Show slide 2" data-slide-index="1"></button>
+                  <button class="slider-dot" type="button" aria-label="Show slide 3" data-slide-index="2"></button>
+                  <button class="slider-dot" type="button" aria-label="Show slide 4" data-slide-index="3"></button>
+                  <button class="slider-dot" type="button" aria-label="Show slide 5" data-slide-index="4"></button>
+                  <button class="slider-dot" type="button" aria-label="Show slide 6" data-slide-index="5"></button>
+                  <button class="slider-dot" type="button" aria-label="Show slide 7" data-slide-index="6"></button>
+                </div>
+              </div>
             </div>
           </article>
 
+        </section>
+
+        <section class="product-grid">
           <article class="card product-card">
             <div class="product-header">
               <img src="/eyedia_chat_ai.png" alt="AI chat automation logo" class="product-logo" />
@@ -85,6 +115,51 @@
           </article>
         </section>
       </main>
+
+      <script>
+        (function () {
+          const sliderRoot = document.querySelector('[data-slider="eyedeea-photos"]');
+          if (!sliderRoot) return;
+
+          const track = sliderRoot.querySelector('.slider-track');
+          const slides = Array.from(sliderRoot.querySelectorAll('.slide'));
+          const dots = Array.from(document.querySelectorAll('.slider-dot'));
+          if (!track || slides.length === 0 || dots.length === 0) return;
+
+          let currentIndex = 0;
+          let timer = null;
+
+          const goToSlide = (index) => {
+            currentIndex = (index + slides.length) % slides.length;
+            track.style.transform = `translateX(-${currentIndex * 100}%)`;
+            dots.forEach((dot, idx) => {
+              dot.classList.toggle('active', idx === currentIndex);
+            });
+          };
+
+          const startAuto = () => {
+            stopAuto();
+            timer = window.setInterval(() => goToSlide(currentIndex + 1), 3200);
+          };
+
+          const stopAuto = () => {
+            if (timer) window.clearInterval(timer);
+          };
+
+          dots.forEach((dot, idx) => {
+            dot.addEventListener('click', () => {
+              goToSlide(idx);
+              startAuto();
+            });
+          });
+
+          sliderRoot.addEventListener('mouseenter', stopAuto);
+          sliderRoot.addEventListener('mouseleave', startAuto);
+
+          goToSlide(0);
+          startAuto();
+        })();
+      </script>
 
       <footer class="footer">
         <span>© 2026 EyediaTech</span>

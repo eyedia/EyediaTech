@@ -150,7 +150,7 @@ nav {
 
 .home-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.95fr);
+  grid-template-columns: 1fr;
   gap: 1.35rem;
   align-items: stretch;
 }
@@ -172,6 +172,7 @@ nav {
 
 .home-about {
   padding: 0;
+  display: flow-root;
 }
 
 .home-visual {
@@ -179,6 +180,19 @@ nav {
   align-items: flex-start;
   justify-content: center;
   background: transparent;
+}
+
+.home-inline-visual {
+  float: right;
+  width: min(44%, 360px);
+  margin: 0.15rem 0 0.95rem 1.1rem;
+}
+
+.home-inline-visual .home-hero-graphic {
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid rgba(2, 123, 198, 0.18);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.09);
 }
 
 .home-hero-graphic {
@@ -228,7 +242,7 @@ p {
 }
 
 .home-about p {
-  max-width: 64ch;
+  max-width: none;
 }
 
 .hero-copy p {
@@ -321,6 +335,90 @@ p {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.15rem;
+}
+
+.product-grid.featured-grid {
+  grid-template-columns: 1fr;
+}
+
+.product-card.featured-product {
+  display: grid;
+  gap: 1rem;
+  padding: 1.65rem;
+}
+
+.featured-product-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.slider-shell {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(2, 123, 198, 0.18);
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.09);
+  aspect-ratio: 16 / 9;
+}
+
+.slider-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.55s ease;
+}
+
+.slide {
+  min-width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #ffffff;
+}
+
+.slider-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+}
+
+.slider-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(15, 23, 42, 0.22);
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.slider-dot.active {
+  background: var(--accent);
+  transform: scale(1.25);
+}
+
+.featured-copy {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.featured-summary {
+  color: var(--text);
+}
+
+.product-note {
+  font-size: 0.92rem;
+  color: #64748b;
 }
 
 .feature-grid {
@@ -416,6 +514,24 @@ p {
   gap: 1.2rem;
 }
 
+.blog-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.86rem;
+  color: #64748b;
+}
+
+.blog-crumb a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.blog-crumb a:hover {
+  text-decoration: underline;
+}
+
 .blog-post {
   display: grid;
   gap: 1rem;
@@ -433,6 +549,17 @@ p {
 .article-section {
   display: grid;
   gap: 0.75rem;
+}
+
+.example-tree {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  color: var(--text);
+  white-space: pre;
+  overflow-x: auto;
 }
 
 .article-section h2 {
@@ -509,6 +636,16 @@ p {
     grid-template-columns: 1fr;
   }
 
+  .home-inline-visual {
+    float: none;
+    width: min(100%, 520px);
+    margin: 0.45rem 0 1rem;
+  }
+
+  .featured-product-layout {
+    grid-template-columns: 1fr;
+  }
+
   .home-about p,
   .hero-copy p {
     max-width: none;
@@ -530,31 +667,30 @@ p {
   }
 
   nav {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     gap: 0.4rem;
     width: 100%;
+    padding-bottom: 0.2rem;
   }
 
   .nav-link {
-    width: 100%;
-    min-width: 0;
-    padding: 0.6rem 0.4rem;
+    flex: 0 0 auto;
+    min-width: fit-content;
+    padding: 0.56rem 0.7rem;
     text-align: center;
-    border-bottom: none;
-    border-radius: 6px;
-    background: rgba(0, 0, 0, 0.03);
     justify-content: center;
+    border-bottom-width: 2px;
   }
 
-  .nav-link:hover {
-    background: rgba(2, 123, 198, 0.07);
-    border-bottom: none;
+  .slider-shell {
+    aspect-ratio: 16 / 9;
   }
 
-  .nav-link.active {
-    background: rgba(2, 123, 198, 0.10);
-    border-bottom: none;
+  .featured-product-layout {
+    gap: 1rem;
   }
 
   .product-header {
