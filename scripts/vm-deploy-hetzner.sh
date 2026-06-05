@@ -6,6 +6,7 @@ BRANCH="main"
 BASE_DIR="/opt/eyedeea"
 COMPOSE_FILE="docker-compose.yml"
 UPSTREAM_PORT="8090"
+ENV_FILE="/tmp/.env_eyediatech_web.txt"
 DOMAIN=""
 DOMAIN_ALIAS=""
 WITH_SSL="false"
@@ -33,6 +34,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --upstream-port)
       UPSTREAM_PORT="$2"
+      shift 2
+      ;;
+    --env-file)
+      ENV_FILE="$2"
       shift 2
       ;;
     --domain)
@@ -77,6 +82,11 @@ fi
 
 if [[ -z "$DOMAIN" ]]; then
   echo "--domain is required" >&2
+  exit 1
+fi
+
+if [[ ! -f "$ENV_FILE" ]]; then
+  echo "Env file missing: $ENV_FILE" >&2
   exit 1
 fi
 
@@ -134,6 +144,9 @@ else
   log "Cloning repository..."
   git clone --branch "$BRANCH" "$REPO_URL" "$REPO_DIR"
 fi
+
+log "Applying environment file..."
+cp "$ENV_FILE" "$REPO_DIR/.env"
 
 log "Deploying compose stack..."
 cd "$REPO_DIR"

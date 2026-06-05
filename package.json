@@ -17,6 +17,7 @@
     "docker:remove": "docker rm -f eyediatech-web"
   },
   "devDependencies": {
+    "@types/node": "^25.9.1",
     "nodemon": "^3.1.10",
     "typescript": "~5.9.3",
     "vite": "^7.3.1"

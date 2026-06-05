@@ -9,6 +9,7 @@ param(
   [int]$UpstreamPort = 8090,
   [string]$ComposeFile = "docker-compose.yml",
   [string]$SshKeyPath = $env:EYEDIATECH_SSH_KEY_PATH,
+  [string]$EnvFile = "F:\Synology\Home\Technical\EyedeeaPhotos\pilot\env_eyediatech_web.txt",
   [string]$VmUser = "root",
   [string]$RepoUrl = "https://github.com/eyedia/EyediaTech.git",
   [string]$Branch = "main",
@@ -79,6 +80,7 @@ if ([string]::IsNullOrWhiteSpace($SshKeyPath)) {
 }
 
 Assert-PathExists $SshKeyPath "SSH key"
+Assert-PathExists $EnvFile "Env file"
 
 $enableSsl = $WithSsl -or $DeployCert
 
@@ -126,12 +128,17 @@ $localDeployScript = Join-Path $PSScriptRoot "vm-deploy-hetzner.sh"
 Assert-PathExists $localDeployScript "Remote root-web deploy helper script"
 
 $resolvedKey = (Resolve-Path -LiteralPath $SshKeyPath).Path
+$resolvedEnvFile = (Resolve-Path -LiteralPath $EnvFile).Path
 $target = ('{0}@{1}' -f $VmUser, $VmHost)
 $remoteScriptPath = $target + ':/tmp/vm-deploy-hetzner.sh'
+$remoteEnvPath = $target + ':/tmp/.env_eyediatech_web.txt'
 
-Write-Host ('[deploy-root-web] Uploading deploy script to {0}' -f $target)
+Write-Host ('[deploy-root-web] Uploading deploy script and env file to {0}' -f $target)
 scp -i $resolvedKey $localDeployScript $remoteScriptPath
 Assert-LastExitCode "SCP remote root-web deploy script"
+
+scp -i $resolvedKey $resolvedEnvFile $remoteEnvPath
+Assert-LastExitCode "SCP env file"
 
 $sslArgs = ""
 if ($enableSsl) {
@@ -153,7 +160,7 @@ if (-not [string]::IsNullOrWhiteSpace($effectiveDomainAlias)) {
 
 Write-Host '[deploy-root-web] Running remote deployment'
 $remoteCmd = @"
-bash /tmp/vm-deploy-hetzner.sh --repo-url '$RepoUrl' --branch '$Branch' --base-dir '$BaseDir' --compose-file '$ComposeFile' --upstream-port '$UpstreamPort' --domain '$Domain'$domainAliasArg$sslArgs
+bash /tmp/vm-deploy-hetzner.sh --repo-url '$RepoUrl' --branch '$Branch' --base-dir '$BaseDir' --compose-file '$ComposeFile' --upstream-port '$UpstreamPort' --domain '$Domain' --env-file '/tmp/.env_eyediatech_web.txt'$domainAliasArg$sslArgs
 "@
 
 ssh -i $resolvedKey $target $remoteCmd
