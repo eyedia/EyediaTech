@@ -137,6 +137,8 @@ mkdir -p "$BASE_DIR"
 
 if [[ -d "$REPO_DIR/.git" ]]; then
   log "Updating repository..."
+  # .env is deploy-managed, not git-managed; remove stale copy so pull can proceed.
+  rm -f "$REPO_DIR/.env"
   git -C "$REPO_DIR" fetch origin
   git -C "$REPO_DIR" checkout "$BRANCH"
   git -C "$REPO_DIR" pull --ff-only origin "$BRANCH"
